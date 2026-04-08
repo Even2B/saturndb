@@ -1,0 +1,1996 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light">
+  <title>SaturnDB — Documentation</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/toml.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/dart.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --accent: #635BFF;
+      --accent-rgb: 99, 91, 255;
+      --accent-light: #EEEEFF;
+      --accent-dark: #4F46E5;
+      --sidebar-bg: #0A0A0A;
+      --sidebar-width: 264px;
+      --toc-width: 216px;
+      --nav-height: 56px;
+      --text: #0F172A;
+      --text-muted: #64748B;
+      --text-subtle: #94A3B8;
+      --border: #E2E8F0;
+      --bg: #FFFFFF;
+      --bg-subtle: #F8FAFC;
+      --code-inline-bg: #F1F5F9;
+      --code-inline-color: #0F172A;
+      --shadow-sm: 0 1px 2px rgba(15,23,42,0.06);
+    }
+
+    html {
+      scroll-behavior: smooth;
+      font-size: 16px;
+      background-color: #ffffff !important;
+      color-scheme: light;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      color: #0F172A !important;
+      background-color: #ffffff !important;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* ─── Navbar ─────────────────────────────────── */
+    .navbar {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: var(--nav-height);
+      background: rgba(255,255,255,0.92);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      padding: 0 20px 0 0;
+      z-index: 300;
+    }
+
+    .nav-sidebar-area {
+      width: var(--sidebar-width);
+      display: flex;
+      align-items: center;
+      padding: 0 20px;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+
+    .nav-logo {
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: -0.6px;
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      text-decoration: none;
+    }
+
+    .logo-mark {
+      width: 30px; height: 30px;
+      background: var(--accent);
+      border-radius: 7px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .logo-mark svg { width: 16px; height: 16px; }
+
+    .nav-badge {
+      font-size: 11px;
+      font-weight: 600;
+      background: var(--accent-light);
+      color: var(--accent);
+      padding: 2px 8px;
+      border-radius: 20px;
+      letter-spacing: 0.2px;
+      border: 1px solid rgba(99,91,255,0.2);
+    }
+
+    .nav-right {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .nav-link {
+      font-size: 13.5px;
+      font-weight: 500;
+      color: var(--text-muted);
+      text-decoration: none;
+      padding: 6px 12px;
+      border-radius: 6px;
+      transition: color 0.15s, background 0.15s;
+      white-space: nowrap;
+    }
+
+    .nav-link:hover { color: var(--text); background: var(--bg-subtle); }
+
+    .nav-link.cta {
+      background: var(--accent);
+      color: white;
+      font-weight: 600;
+    }
+
+    .nav-link.cta:hover { background: var(--accent-dark); color: white; }
+
+    .menu-btn {
+      display: none;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 8px;
+      color: var(--text);
+      border-radius: 6px;
+    }
+
+    .menu-btn:hover { background: var(--bg-subtle); }
+
+    /* ─── Sidebar ─────────────────────────────────── */
+    .sidebar {
+      position: fixed;
+      top: var(--nav-height);
+      left: 0; bottom: 0;
+      width: var(--sidebar-width);
+      background: var(--sidebar-bg);
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding: 20px 0 48px;
+      z-index: 200;
+      transition: transform 0.25s cubic-bezier(0.4,0,0.2,1);
+    }
+
+    .sidebar::-webkit-scrollbar { width: 3px; }
+    .sidebar::-webkit-scrollbar-track { background: transparent; }
+    .sidebar::-webkit-scrollbar-thumb { background: #2A2A2A; border-radius: 2px; }
+
+    .sidebar-group { margin-bottom: 4px; }
+
+    .sidebar-cat {
+      font-size: 10.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #444;
+      padding: 12px 18px 5px;
+    }
+
+    .sidebar-link {
+      display: flex;
+      align-items: center;
+      font-size: 13.5px;
+      color: #767676;
+      text-decoration: none;
+      padding: 5px 18px 5px 26px;
+      transition: color 0.12s, background 0.12s;
+      line-height: 1.5;
+      border-left: 2px solid transparent;
+      margin-left: 0;
+      position: relative;
+    }
+
+    .sidebar-link::before {
+      content: '';
+      width: 4px; height: 4px;
+      border-radius: 50%;
+      background: currentColor;
+      opacity: 0.4;
+      margin-right: 10px;
+      flex-shrink: 0;
+      transition: opacity 0.12s;
+    }
+
+    .sidebar-link:hover { color: #C8C8C8; background: rgba(255,255,255,0.04); }
+    .sidebar-link:hover::before { opacity: 0.7; }
+
+    .sidebar-link.active {
+      color: var(--accent);
+      background: rgba(99,91,255,0.1);
+      border-left-color: var(--accent);
+      padding-left: 24px;
+    }
+
+    .sidebar-link.active::before { opacity: 1; background: var(--accent); }
+
+    .sidebar-section-label {
+      font-size: 13.5px;
+      font-weight: 600;
+      color: #C0C0C0;
+      padding: 6px 18px 2px;
+      display: block;
+    }
+
+    /* ─── Layout ─────────────────────────────────── */
+    .page-body {
+      display: flex;
+      margin-left: var(--sidebar-width);
+      margin-top: var(--nav-height);
+      min-height: calc(100vh - var(--nav-height));
+    }
+
+    .content-wrap {
+      flex: 1;
+      min-width: 0;
+      padding: 52px 48px 100px;
+    }
+
+    .content { max-width: 720px; }
+
+    /* ─── TOC ─────────────────────────────────── */
+    .toc-wrap {
+      width: var(--toc-width);
+      flex-shrink: 0;
+      padding: 52px 0 0 8px;
+    }
+
+    .toc-inner {
+      position: sticky;
+      top: calc(var(--nav-height) + 20px);
+    }
+
+    .toc-title {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.9px;
+      color: var(--text-subtle);
+      margin-bottom: 10px;
+    }
+
+    .toc-link {
+      display: block;
+      font-size: 12.5px;
+      color: var(--text-subtle);
+      text-decoration: none;
+      padding: 3px 0 3px 12px;
+      border-left: 2px solid var(--border);
+      transition: color 0.12s, border-color 0.12s;
+      line-height: 1.5;
+      margin-bottom: 1px;
+    }
+
+    .toc-link:hover { color: var(--text-muted); border-left-color: var(--text-subtle); }
+    .toc-link.active { color: var(--accent); border-left-color: var(--accent); font-weight: 500; }
+    .toc-link.sub { padding-left: 22px; font-size: 12px; }
+
+    /* ─── Typography ─────────────────────────────────── */
+    .content h1 {
+      font-size: 30px;
+      font-weight: 700;
+      letter-spacing: -0.7px;
+      color: var(--text);
+      line-height: 1.2;
+      margin-bottom: 12px;
+    }
+
+    .content h2 {
+      font-size: 21px;
+      font-weight: 700;
+      letter-spacing: -0.4px;
+      color: var(--text);
+      margin: 52px 0 14px;
+      padding-top: 52px;
+      border-top: 1px solid var(--border);
+      line-height: 1.3;
+    }
+
+    .content section:first-child h2 { border-top: none; padding-top: 0; margin-top: 0; }
+
+    .content h3 {
+      font-size: 15.5px;
+      font-weight: 600;
+      color: var(--text);
+      margin: 28px 0 8px;
+    }
+
+    .content p {
+      font-size: 15px;
+      color: var(--text-muted);
+      line-height: 1.72;
+      margin-bottom: 14px;
+    }
+
+    .content ul, .content ol {
+      padding-left: 22px;
+      margin-bottom: 14px;
+    }
+
+    .content li {
+      font-size: 15px;
+      color: var(--text-muted);
+      line-height: 1.7;
+      margin-bottom: 3px;
+    }
+
+    .content a {
+      color: var(--accent);
+      text-decoration: none;
+      border-bottom: 1px solid rgba(99,91,255,0.3);
+      transition: border-color 0.12s;
+    }
+
+    .content a:hover { border-bottom-color: var(--accent); }
+
+    .content code {
+      font-family: 'JetBrains Mono', 'Fira Code', monospace;
+      font-size: 12.5px;
+      background: var(--code-inline-bg);
+      color: var(--code-inline-color);
+      padding: 2px 6px;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+    }
+
+    /* ─── Code Blocks ─────────────────────────────────── */
+    .code-block {
+      position: relative;
+      margin: 18px 0;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 0 0 1px rgba(255,255,255,0.06), 0 2px 8px rgba(0,0,0,0.15);
+    }
+
+    .code-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 9px 14px;
+      background: #161B22;
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+    }
+
+    .code-lang {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: #6B7280;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .copy-btn {
+      font-size: 11.5px;
+      font-weight: 500;
+      color: #5A6372;
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 5px;
+      padding: 3px 10px;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      transition: all 0.12s;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .copy-btn:hover { color: #C9D1D9; border-color: rgba(255,255,255,0.25); background: rgba(255,255,255,0.06); }
+    .copy-btn.copied { color: #3FB950; border-color: rgba(63,185,80,0.35); background: rgba(63,185,80,0.08); }
+
+    .code-block pre {
+      margin: 0;
+      padding: 18px 20px;
+      overflow-x: auto;
+      background: #0D1117 !important;
+      color: #e6edf3 !important;
+    }
+
+    .code-block pre code {
+      font-family: 'JetBrains Mono', 'Fira Code', monospace !important;
+      font-size: 13px !important;
+      line-height: 1.65 !important;
+      background: transparent !important;
+      border: none !important;
+      padding: 0 !important;
+      color: #e6edf3 !important;
+    }
+
+    .hljs { background: transparent !important; }
+
+    /* ─── Lang Tabs ─────────────────────────────────── */
+    .lang-tabs { margin: 20px 0; }
+
+    .tab-nav {
+      display: flex;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 0;
+      gap: 0;
+    }
+
+    .tab-btn {
+      font-size: 13.5px;
+      font-weight: 500;
+      color: var(--text-muted);
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      padding: 9px 16px 11px;
+      cursor: pointer;
+      margin-bottom: -1px;
+      transition: color 0.12s, border-color 0.12s;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .tab-btn:hover { color: var(--text); }
+    .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* ─── Tables ─────────────────────────────────── */
+    .table-wrap {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+      margin: 18px 0;
+    }
+
+    .content table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13.5px;
+    }
+
+    .content th {
+      text-align: left;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: var(--text-subtle);
+      padding: 9px 14px;
+      background: var(--bg-subtle);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .content td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-muted);
+      vertical-align: top;
+      line-height: 1.55;
+    }
+
+    .content tr:last-child td { border-bottom: none; }
+    .content tr:hover td { background: #FBFCFD; }
+
+    /* ─── Callouts ─────────────────────────────────── */
+    .callout {
+      border-left: 3px solid var(--accent);
+      background: var(--accent-light);
+      padding: 13px 16px;
+      border-radius: 0 8px 8px 0;
+      margin: 18px 0;
+    }
+
+    .callout p { color: #4338CA; margin: 0; font-size: 14px; line-height: 1.6; }
+    .callout strong { color: #3730A3; }
+
+    .callout.tip { border-left-color: #10B981; background: #ECFDF5; }
+    .callout.tip p { color: #065F46; }
+
+    .callout.warn { border-left-color: #F59E0B; background: #FFFBEB; }
+    .callout.warn p { color: #92400E; }
+
+    /* ─── Hero ─────────────────────────────────── */
+    .hero {
+      padding-bottom: 36px;
+      margin-bottom: 40px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .hero-eyebrow {
+      font-size: 11.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--accent);
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .hero-eyebrow::before {
+      content: '';
+      width: 18px; height: 2px;
+      background: var(--accent);
+      border-radius: 2px;
+    }
+
+    .hero p {
+      font-size: 16.5px;
+      color: var(--text-muted);
+      line-height: 1.68;
+      max-width: 560px;
+      margin-bottom: 20px;
+    }
+
+    .badge-row { display: flex; flex-wrap: wrap; gap: 8px; }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 12px;
+      font-weight: 500;
+      padding: 5px 11px;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      background: var(--bg);
+      white-space: nowrap;
+    }
+
+    .pill.green  { color: #059669; border-color: #A7F3D0; background: #F0FDF4; }
+    .pill.purple { color: var(--accent); border-color: rgba(99,91,255,0.3); background: var(--accent-light); }
+    .pill.blue   { color: #2563EB; border-color: #BFDBFE; background: #EFF6FF; }
+    .pill.orange { color: #D97706; border-color: #FDE68A; background: #FFFBEB; }
+
+    /* ─── Feature Grid ─────────────────────────────────── */
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin: 22px 0;
+    }
+
+    .feature-card {
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      padding: 16px;
+      background: var(--bg);
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+
+    .feature-card:hover {
+      border-color: rgba(99,91,255,0.3);
+      box-shadow: 0 2px 12px rgba(99,91,255,0.06);
+    }
+
+    .feat-icon {
+      font-size: 20px;
+      margin-bottom: 9px;
+      display: block;
+    }
+
+    .feature-card h4 {
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+
+    .feature-card p { font-size: 13px; color: var(--text-muted); margin: 0; line-height: 1.55; }
+
+    /* ─── Steps ─────────────────────────────────── */
+    .steps { margin: 20px 0; }
+
+    .step {
+      display: flex;
+      gap: 18px;
+      margin-bottom: 28px;
+      position: relative;
+    }
+
+    .step:not(:last-child)::after {
+      content: '';
+      position: absolute;
+      left: 13px;
+      top: 29px;
+      bottom: -10px;
+      width: 1px;
+      background: var(--border);
+    }
+
+    .step-num {
+      width: 28px; height: 28px;
+      background: var(--accent);
+      color: white;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .step-body { flex: 1; min-width: 0; }
+    .step-body h3 { margin: 3px 0 8px; font-size: 15px; }
+    .step-body p { margin-bottom: 8px; }
+
+    /* ─── Perf Stats ─────────────────────────────────── */
+    .perf-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin: 20px 0;
+    }
+
+    .perf-card {
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      padding: 18px 16px;
+      background: var(--bg-subtle);
+      text-align: center;
+    }
+
+    .perf-value {
+      font-size: 26px;
+      font-weight: 700;
+      color: var(--accent);
+      letter-spacing: -1px;
+      line-height: 1;
+      margin-bottom: 5px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .perf-label { font-size: 12px; color: var(--text-subtle); font-weight: 500; }
+    .perf-sub   { font-size: 11px; color: var(--text-subtle); margin-top: 2px; }
+
+    /* ─── Module Cards ─────────────────────────────────── */
+    .module-list { margin: 18px 0; display: flex; flex-direction: column; gap: 6px; }
+
+    .module-card {
+      display: grid;
+      grid-template-columns: 100px 130px 1fr;
+      gap: 12px;
+      padding: 11px 14px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--bg);
+      align-items: start;
+      transition: border-color 0.12s;
+    }
+
+    .module-card:hover { border-color: rgba(99,91,255,0.3); }
+
+    .mod-name { font-size: 13px; font-weight: 600; color: var(--text); }
+    .mod-file {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11.5px;
+      color: var(--accent);
+      background: var(--accent-light);
+      padding: 2px 7px;
+      border-radius: 4px;
+      display: inline-block;
+      font-weight: 500;
+    }
+    .mod-desc { font-size: 13px; color: var(--text-muted); line-height: 1.5; }
+
+    /* ─── WAL Mode Compare ─────────────────────────────────── */
+    .wal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 18px 0; }
+
+    .wal-card {
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      padding: 18px;
+      background: var(--bg-subtle);
+    }
+
+    .wal-card h4 {
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .wal-card h4 .dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .wal-card .big { font-size: 22px; font-weight: 700; color: var(--text); letter-spacing: -0.5px; margin-bottom: 2px; }
+    .wal-card p { font-size: 13px; color: var(--text-muted); margin: 6px 0 0; line-height: 1.5; }
+
+    /* ─── Sidebar overlay ─────────────────────────────────── */
+    .overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 150;
+      backdrop-filter: blur(2px);
+    }
+
+    /* ─── Dividers ─────────────────────────────────── */
+    .section-anchor { display: block; }
+
+    /* ─── Responsive ─────────────────────────────────── */
+    @media (max-width: 1180px) {
+      .toc-wrap { display: none; }
+      .content-wrap { padding-right: 40px; }
+    }
+
+    @media (max-width: 768px) {
+      .sidebar { transform: translateX(-100%); }
+      .sidebar.open { transform: translateX(0); }
+      .overlay.open { display: block; }
+      .page-body { margin-left: 0; }
+      .content-wrap { padding: 32px 20px 80px; }
+      .menu-btn { display: flex; }
+      .nav-right { display: none; }
+      .nav-sidebar-area { width: auto; }
+      .feature-grid { grid-template-columns: 1fr; }
+      .perf-grid { grid-template-columns: repeat(2, 1fr); }
+      .module-card { grid-template-columns: 1fr; gap: 4px; }
+      .wal-grid { grid-template-columns: 1fr; }
+      .content h1 { font-size: 24px; }
+      .content h2 { font-size: 19px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ─── Navbar ─────────────────────────────────── -->
+<nav class="navbar">
+  <div class="nav-sidebar-area">
+    <button class="menu-btn" id="menuBtn" aria-label="Toggle menu">
+      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <line x1="2" y1="5" x2="16" y2="5"/><line x1="2" y1="9" x2="16" y2="9"/><line x1="2" y1="13" x2="16" y2="13"/>
+      </svg>
+    </button>
+    <a href="#introduction" class="nav-logo">
+      <div class="logo-mark">
+        <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M8 2L13 5V11L8 14L3 11V5L8 2Z" stroke="white" stroke-width="1.5" stroke-linejoin="round"/>
+          <path d="M8 2V8M8 8L13 5M8 8L3 5M8 8V14" stroke="white" stroke-width="1.2" opacity="0.7"/>
+        </svg>
+      </div>
+      SaturnDB
+    </a>
+    <span class="nav-badge">v1.0</span>
+  </div>
+  <div class="nav-right">
+    <a href="#getting-started" class="nav-link">Quickstart</a>
+    <a href="#sdks" class="nav-link">SDKs</a>
+    <a href="#protocol" class="nav-link">Reference</a>
+    <a href="https://github.com" class="nav-link cta">GitHub</a>
+  </div>
+</nav>
+
+<!-- ─── Overlay ─────────────────────────────────── -->
+<div class="overlay" id="overlay"></div>
+
+<!-- ─── Sidebar ─────────────────────────────────── -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-group">
+    <div class="sidebar-cat">Overview</div>
+    <a href="#introduction" class="sidebar-link" data-section="introduction">Introduction</a>
+  </div>
+
+  <div class="sidebar-group">
+    <div class="sidebar-cat">Guides</div>
+    <span class="sidebar-section-label">Getting Started</span>
+    <a href="#installation" class="sidebar-link" data-section="installation">Installation</a>
+    <a href="#running-server" class="sidebar-link" data-section="running-server">Running the Server</a>
+    <a href="#cli-usage" class="sidebar-link" data-section="cli-usage">CLI Usage</a>
+    <a href="#quick-start" class="sidebar-link" data-section="quick-start">Quick Start</a>
+    <span class="sidebar-section-label" style="margin-top:8px">Configuration</span>
+    <a href="#config-reference" class="sidebar-link" data-section="config-reference">Config Reference</a>
+    <a href="#roles-tokens" class="sidebar-link" data-section="roles-tokens">Roles &amp; Tokens</a>
+    <span class="sidebar-section-label" style="margin-top:8px">Security</span>
+    <a href="#jwt-auth" class="sidebar-link" data-section="jwt-auth">JWT Auth</a>
+    <a href="#stream-ownership" class="sidebar-link" data-section="stream-ownership">Stream Ownership</a>
+    <a href="#token-templates" class="sidebar-link" data-section="token-templates">Token Templates</a>
+    <a href="#security-hardening" class="sidebar-link" data-section="security-hardening">Hardening</a>
+    <a href="#geospatial" class="sidebar-link" data-section="geospatial">Geospatial</a>
+    <a href="#durable-subscriptions" class="sidebar-link" data-section="durable-subscriptions">Durable Subscriptions</a>
+    <a href="#durable-queues" class="sidebar-link" data-section="durable-queues">Durable Queues</a>
+  </div>
+
+  <div class="sidebar-group">
+    <div class="sidebar-cat">Reference</div>
+    <span class="sidebar-section-label">Protocol</span>
+    <a href="#wire-protocol" class="sidebar-link" data-section="wire-protocol">Wire Protocol</a>
+    <a href="#commands" class="sidebar-link" data-section="commands">Commands</a>
+    <a href="#responses" class="sidebar-link" data-section="responses">Responses</a>
+    <a href="#transactions" class="sidebar-link" data-section="transactions">Transactions</a>
+    <span class="sidebar-section-label" style="margin-top:8px">SDKs</span>
+    <a href="#sdk-js" class="sidebar-link" data-section="sdk-js">JavaScript</a>
+    <a href="#sdk-python" class="sidebar-link" data-section="sdk-python">Python</a>
+    <a href="#sdk-dart" class="sidebar-link" data-section="sdk-dart">Dart</a>
+  </div>
+
+  <div class="sidebar-group">
+    <div class="sidebar-cat">Internals</div>
+    <a href="#modules" class="sidebar-link" data-section="modules">Modules</a>
+    <a href="#wal-snapshots" class="sidebar-link" data-section="wal-snapshots">WAL &amp; Snapshots</a>
+    <a href="#performance" class="sidebar-link" data-section="performance">Performance</a>
+    <a href="#design-decisions" class="sidebar-link" data-section="design-decisions">Design Decisions</a>
+  </div>
+</aside>
+
+<!-- ─── Page Body ─────────────────────────────────── -->
+<div class="page-body">
+  <main class="content-wrap">
+    <div class="content">
+
+      <!-- ─── Introduction ─────────────────────────────────── -->
+      <section id="introduction" class="section-anchor">
+        <div class="hero">
+          <div class="hero-eyebrow">Open Source · Built in Rust</div>
+          <h1>SaturnDB Documentation</h1>
+          <p>A realtime event-sourced database with sub-millisecond push to all subscribers on every write. Append-only event log with Redis-inspired protocol, history replay, and stream-level access control.</p>
+          <div class="badge-row">
+            <span class="pill green">⚡ &lt;1ms pub/sub</span>
+            <span class="pill purple">∞ Append-only log</span>
+            <span class="pill blue">🔐 Token-based auth</span>
+            <span class="pill orange">🦀 Built in Rust</span>
+          </div>
+        </div>
+
+        <div class="feature-grid">
+          <div class="feature-card">
+            <span class="feat-icon">⚡</span>
+            <h4>Sub-millisecond Push</h4>
+            <p>Every write fans out to all pattern subscribers using tokio broadcast channels.</p>
+          </div>
+          <div class="feature-card">
+            <span class="feat-icon">📜</span>
+            <h4>Append-only Log</h4>
+            <p>Events are never deleted — history is preserved forever and replayable from any timestamp.</p>
+          </div>
+          <div class="feature-card">
+            <span class="feat-icon">🔍</span>
+            <h4>Pattern Subscriptions</h4>
+            <p>Watch entire namespaces with glob patterns like <code>users:*</code> or <code>orders:*</code>.</p>
+          </div>
+          <div class="feature-card">
+            <span class="feat-icon">🔐</span>
+            <h4>Token-based Auth</h4>
+            <p>Admin, Writer, and Reader roles with per-namespace access control and token expiry.</p>
+          </div>
+          <div class="feature-card">
+            <span class="feat-icon">⚙️</span>
+            <h4>ACID Transactions</h4>
+            <p>Atomic multi-stream writes with <code>BEGIN</code> / <code>COMMIT</code> / <code>ROLLBACK</code>.</p>
+          </div>
+          <div class="feature-card">
+            <span class="feat-icon">🌐</span>
+            <h4>WebSocket Proxy</h4>
+            <p>Browser clients connect on port 7380 — no separate process, embedded in the server.</p>
+          </div>
+          <div class="feature-card">
+            <span class="feat-icon">🔒</span>
+            <h4>Optional TLS</h4>
+            <p>Self-signed cert auto-generated. Toggle <code>tls = true</code> in config for production.</p>
+          </div>
+          <div class="feature-card">
+            <span class="feat-icon">🚀</span>
+            <h4>Fast Startup</h4>
+            <p>Snapshot + WAL replay — restores full state instantly without replaying the entire log.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ─── Getting Started ─────────────────────────────────── -->
+      <section id="getting-started">
+        <h2>Getting Started</h2>
+        <p>Get SaturnDB running locally in under two minutes. You'll need the Rust toolchain installed.</p>
+
+        <div class="steps">
+          <div class="step" id="installation">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <h3>Build the server</h3>
+              <p>Clone the repository and build in release mode for best performance.</p>
+              <div class="code-block">
+                <div class="code-header"><span class="code-lang">bash</span><button class="copy-btn">Copy</button></div>
+                <pre><code class="language-bash">git clone https://github.com/your-org/saturn.git
+cd saturn
+cargo build --release</code></pre>
+              </div>
+            </div>
+          </div>
+
+          <div class="step" id="running-server">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <h3>Start the server</h3>
+              <p>The server reads <code>saturn.toml</code> from the current directory and listens on port 7379 (TCP) and 7380 (WebSocket).</p>
+              <div class="code-block">
+                <div class="code-header"><span class="code-lang">bash</span><button class="copy-btn">Copy</button></div>
+                <pre><code class="language-bash">./target/release/saturn-server</code></pre>
+              </div>
+            </div>
+          </div>
+
+          <div class="step" id="cli-usage">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <h3>Use the CLI</h3>
+              <p>The <code>saturn</code> CLI reads credentials from environment variables. Set <code>SATURN_TOKEN</code> and start sending commands.</p>
+              <div class="code-block">
+                <div class="code-header"><span class="code-lang">bash</span><button class="copy-btn">Copy</button></div>
+                <pre><code class="language-bash">export SATURN_TOKEN=saturn-admin-secret
+export SATURN_HOST=127.0.0.1
+export SATURN_PORT=7379
+
+./target/release/saturn ping
+./target/release/saturn emit users:1 '{"name":"alice","online":true}'
+./target/release/saturn get users:1
+./target/release/saturn keys "*"
+./target/release/saturn watch "users:*"</code></pre>
+              </div>
+            </div>
+          </div>
+
+          <div class="step" id="quick-start">
+            <div class="step-num">4</div>
+            <div class="step-body">
+              <h3>Connect with an SDK</h3>
+              <p>All SDKs follow the same <code>SaturnDBClient(host, port, token)</code> interface with automatic auth and reconnection.</p>
+              <div class="code-block">
+                <div class="code-header"><span class="code-lang">javascript</span><button class="copy-btn">Copy</button></div>
+                <pre><code class="language-javascript">const { SaturnDBClient } = require('./sdk/js/saturn.js');
+
+const client = new SaturnDBClient('127.0.0.1', 7379, 'my-token');
+await client.connect();
+
+// Write an event
+await client.emit('users:1', { name: 'alice', online: true });
+
+// Read latest state
+const user = await client.get('users:1');
+
+// Subscribe to a pattern
+await client.watch('users:*', (stream, data) => {
+  console.log(`[${stream}]`, data);
+});
+
+// Replay full history
+const history = await client.since('users:1', 0);</code></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ─── Configuration ─────────────────────────────────── -->
+      <section id="configuration">
+        <h2>Configuration</h2>
+        <p>SaturnDB is configured via <code>saturn.toml</code> in the working directory. The file is loaded once at startup.</p>
+
+        <div id="config-reference">
+          <h3>saturn.toml</h3>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">toml</span><button class="copy-btn">Copy</button></div>
+            <pre><code class="language-toml">[server]
+host    = "127.0.0.1"
+port    = 7379
+ws_port = 7380
+tls     = false           # true = TLS, false = plain TCP
+max_auth_failures       = 5    # drop connection after N bad AUTHs (0 = off)
+max_conn_per_ip_per_sec = 10.0 # new connections/sec per IP (0 = off)
+max_conn_burst_per_ip   = 20.0 # burst capacity per IP
+
+[auth]
+admin_token = "saturn-admin-secret"
+
+[auth.tokens]
+"myapp-token" = { role = "writer", namespaces = ["users", "profiles"] }
+"logs-token"  = { role = "reader", namespaces = ["logs"], can_since = false }
+"temp-token"  = { role = "reader", namespaces = ["public"], expires_at = "2026-12-31" }
+
+# JWT verification — accepts Supabase JWTs directly
+[auth.jwt]
+secret     = "your-supabase-jwt-secret"
+role       = "writer"
+namespaces = ["user:{sub}", "ride:{sub}"]   # {sub} = JWT subject (user_id)
+
+[storage]
+log_path          = "saturn.log"
+snapshot_interval = 1000    # snapshot every N events
+audit_log         = "saturn-audit.log"  # append-only audit log (empty = off)</code></pre>
+          </div>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Field</th>
+                  <th>Default</th>
+                  <th>Description</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td><code>server.host</code></td><td><code>127.0.0.1</code></td><td>TCP bind address</td></tr>
+                <tr><td><code>server.port</code></td><td><code>7379</code></td><td>TCP port for binary/text protocol</td></tr>
+                <tr><td><code>server.ws_port</code></td><td><code>7380</code></td><td>WebSocket proxy port for browsers</td></tr>
+                <tr><td><code>server.tls</code></td><td><code>false</code></td><td>Enable TLS — self-signed cert auto-generated</td></tr>
+                <tr><td><code>server.max_auth_failures</code></td><td><code>5</code></td><td>Drop connection after N consecutive bad AUTHs. 0 = disabled.</td></tr>
+                <tr><td><code>server.max_conn_per_ip_per_sec</code></td><td><code>10.0</code></td><td>Max new connections per second from one IP (token bucket). 0 = disabled.</td></tr>
+                <tr><td><code>server.max_conn_burst_per_ip</code></td><td><code>20.0</code></td><td>Burst capacity for per-IP connection rate limit.</td></tr>
+                <tr><td><code>auth.admin_token</code></td><td>—</td><td>Full-access token, required</td></tr>
+                <tr><td><code>auth.jwt.secret</code></td><td><code>""</code></td><td>HMAC secret for HS256 JWT verification. Empty = JWT auth disabled.</td></tr>
+                <tr><td><code>auth.jwt.role</code></td><td><code>writer</code></td><td>Role granted to JWT-authenticated users.</td></tr>
+                <tr><td><code>auth.jwt.namespaces</code></td><td><code>[]</code></td><td>Namespace templates for JWT users. <code>{sub}</code> is replaced with the JWT subject.</td></tr>
+                <tr><td><code>storage.log_path</code></td><td><code>saturn.log</code></td><td>Path to the append-only WAL file</td></tr>
+                <tr><td><code>storage.snapshot_interval</code></td><td><code>1000</code></td><td>Write a snapshot every N events</td></tr>
+                <tr><td><code>storage.audit_log</code></td><td><code>""</code></td><td>Path to the append-only audit log. Empty = disabled.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div id="roles-tokens">
+          <h3>Roles &amp; Tokens</h3>
+          <p>Every connection must authenticate with a token. Tokens carry a role and optional namespace restrictions.</p>
+
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Role</th><th>Permissions</th></tr></thead>
+              <tbody>
+                <tr><td><code>admin</code></td><td>Full access to all commands, all namespaces, token management</td></tr>
+                <tr><td><code>writer</code></td><td>Read + write within assigned namespaces</td></tr>
+                <tr><td><code>reader</code></td><td>Read only within assigned namespaces</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <p>Token options in <code>saturn.toml</code> or via <code>TOKEN CREATE</code>:</p>
+
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Option</th><th>Type</th><th>Description</th></tr></thead>
+              <tbody>
+                <tr><td><code>role</code></td><td>string</td><td><code>admin</code>, <code>writer</code>, or <code>reader</code></td></tr>
+                <tr><td><code>namespaces</code></td><td>array</td><td>Allowed stream namespaces, e.g. <code>["users", "orders"]</code>. Supports wildcard suffix: <code>users:*</code></td></tr>
+                <tr><td><code>can_watch</code></td><td>bool</td><td>Allow WATCH subscriptions (default: true)</td></tr>
+                <tr><td><code>can_since</code></td><td>bool</td><td>Allow SINCE history replay (default: true)</td></tr>
+                <tr><td><code>expires_at</code></td><td>string</td><td>ISO date string, e.g. <code>"2026-12-31"</code></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ─── Security ─────────────────────────────────── -->
+      <section id="security">
+        <h2>Security</h2>
+
+        <div id="jwt-auth">
+          <h3>JWT Authentication</h3>
+          <p>Saturn can verify Supabase (or any HS256) JWTs directly. Once configured, clients pass their JWT as the <code>AUTH</code> token — no separate token management needed.</p>
+
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">toml</span><button class="copy-btn">Copy</button></div>
+            <pre><code class="language-toml">[auth.jwt]
+secret     = "your-supabase-jwt-secret"   # Settings → API → JWT Secret
+role       = "writer"
+namespaces = ["user:{sub}", "ride:{sub}"]  # {sub} replaced with user_id</code></pre>
+          </div>
+
+          <p>The client authenticates with their Supabase JWT exactly like any other token:</p>
+
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">text</span><button class="copy-btn">Copy</button></div>
+            <pre><code class="language-plaintext">AUTH eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+OK</code></pre>
+          </div>
+
+          <p>Saturn verifies the signature, extracts the <code>sub</code> claim (user UUID), and creates an ephemeral session scoped to the configured namespaces. The session inherits the JWT's <code>exp</code> — it auto-expires when the JWT expires.</p>
+
+          <div class="callout tip">
+            <p>Use <code>{sub}</code> in namespace templates to automatically scope each user to their own data: <code>namespaces = ["user:{sub}"]</code> means user <code>abc-123</code> can only access streams starting with <code>user:abc-123</code>.</p>
+          </div>
+        </div>
+
+        <div id="stream-ownership">
+          <h3>Stream Ownership</h3>
+          <p><code>CLAIM</code> locks a stream to the authenticated user. After claiming, only the owner (or an admin) can <code>EMIT</code>, <code>PATCH</code>, or <code>DEL</code> to that stream. Reads are still governed by namespace access.</p>
+
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">text</span><button class="copy-btn">Copy</button></div>
+            <pre><code class="language-plaintext"># Authenticated as JWT user (sub = "abc-123")
+CLAIM driver:abc-123
+OK claimed driver:abc-123 for abc-123
+
+# Another user trying to write → rejected
+EMIT driver:abc-123 {"lat":1.23,"lng":4.56}
+ERR forbidden: stream is owned by another user</code></pre>
+          </div>
+
+          <p>Ownership is persisted in the snapshot and survives server restarts. Requires a JWT session — static tokens without a <code>user_id</code> cannot claim streams.</p>
+
+          <div class="callout">
+            <p><strong>Ride-hailing pattern:</strong> when a driver connects, have them <code>CLAIM driver:{their_id}</code>. Now only that driver can update their own location stream — no other client can spoof their position.</p>
+          </div>
+        </div>
+
+        <div id="token-templates">
+          <h3>Token Templates</h3>
+          <p>Token templates auto-create access tokens whenever a matching stream is written. This is the equivalent of row-level security for programmatic token issuance — no edge function needed.</p>
+
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">text</span><button class="copy-btn">Copy</button></div>
+            <pre><code class="language-plaintext"># When any user:* stream is written, create a scoped token for that user
+WHEN TOKEN user:* rider:$stream_id writer ride:$stream_id,driver:$stream_id
+OK token rule added: user:* → rider:$stream_id
+
+# Now emit a user stream
+EMIT user:123 {"name":"evan"}
+OK
+
+# Token rider:123 is now automatically available with access to ride:123 and driver:123</code></pre>
+          </div>
+
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Variable</th><th>Value</th></tr></thead>
+              <tbody>
+                <tr><td><code>$stream</code></td><td>Full stream name, e.g. <code>user:123</code></td></tr>
+                <tr><td><code>$stream_id</code></td><td>Part after the last <code>:</code>, e.g. <code>123</code></td></tr>
+                <tr><td><code>$ts</code></td><td>Event timestamp (Unix microseconds)</td></tr>
+                <tr><td><code>$&lt;field&gt;</code></td><td>Any top-level JSON field from the event payload</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <p>Manage token template rules with:</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">text</span><button class="copy-btn">Copy</button></div>
+            <pre><code class="language-plaintext">WHEN TOKEN LIST
+TOKEN_RULE user:* rider:$stream_id writer ride:$stream_id,driver:$stream_id
+
+WHEN TOKEN DEL user:* rider:$stream_id
+OK token rule removed: user:* → rider:$stream_id</code></pre>
+          </div>
+
+          <p>Rules are persisted to <code>saturn-rules.json</code> alongside WHEN EMIT rules and survive restarts.</p>
+        </div>
+
+        <div id="security-hardening">
+          <h3>Security Hardening</h3>
+
+          <h4 style="margin:20px 0 8px;font-size:15px;font-weight:600">Failed Auth Limit</h4>
+          <p>Saturn drops a connection after <code>max_auth_failures</code> consecutive bad <code>AUTH</code> attempts. The counter resets on a successful auth. Default: 5.</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">toml</span><button class="copy-btn">Copy</button></div>
+            <pre><code class="language-toml">[server]
+max_auth_failures = 5   # 0 = disabled</code></pre>
+          </div>
+
+          <h4 style="margin:20px 0 8px;font-size:15px;font-weight:600">Per-IP Connection Rate Limit</h4>
+          <p>Limits new TCP connections per source IP using a token bucket. Protects against connection-flood attacks. Default: 10/sec, burst 20.</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">toml</span><button class="copy-btn">Copy</button></div>
+            <pre><code class="language-toml">[server]
+max_conn_per_ip_per_sec = 10.0  # 0 = disabled
+max_conn_burst_per_ip   = 20.0</code></pre>
+          </div>
+
+          <h4 style="margin:20px 0 8px;font-size:15px;font-weight:600">Audit Log</h4>
+          <p>An append-only JSONL file that records every write operation. Fire-and-forget — never blocks request handling.</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">toml</span><button class="copy-btn">Copy</button></div>
+            <pre><code class="language-toml">[storage]
+audit_log = "saturn-audit.log"</code></pre>
+          </div>
+
+          <p>Each line is a JSON object:</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">json</span><button class="copy-btn">Copy</button></div>
+            <pre><code class="language-json">{"ts":1712345678,"op":"EMIT","user":"abc-123","stream":"driver:abc-123","result":"OK"}
+{"ts":1712345679,"op":"AUTH","user":"-","stream":"-","result":"ERR"}
+{"ts":1712345680,"op":"CLAIM","user":"abc-123","stream":"driver:abc-123","result":"OK"}</code></pre>
+          </div>
+
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Operation logged</th><th>Description</th></tr></thead>
+              <tbody>
+                <tr><td><code>AUTH</code></td><td>All auth attempts (success and failure)</td></tr>
+                <tr><td><code>EMIT</code>, <code>PATCH</code>, <code>DEL</code></td><td>All write operations</td></tr>
+                <tr><td><code>CLAIM</code></td><td>Stream ownership changes</td></tr>
+                <tr><td><code>TOKEN_CREATE</code>, <code>TOKEN_REVOKE</code></td><td>Token management</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ─── Durable Subscriptions ───────────────────────── -->
+      <section id="durable-subscriptions">
+        <h2>Durable Subscriptions</h2>
+        <p><code>WATCH</code> drops events if you disconnect. <code>SUBSCRIBE</code> is the reliable alternative — it replays everything you missed then streams live events, so you never lose a message across reconnects.</p>
+
+        <h3>How it works</h3>
+        <ol>
+          <li>Client sends <code>SUBSCRIBE &lt;pattern&gt; FROM &lt;last_event_id&gt;</code></li>
+          <li>Server replies <code>SUBSCRIBED &lt;pattern&gt; &lt;count&gt;</code></li>
+          <li>Server streams <code>SEVENT &lt;stream&gt; &lt;id&gt; &lt;payload&gt;</code> for each historical event (id &gt; last_event_id), sorted by id</li>
+          <li>Server sends <code>LIVE</code> — end of replay, now streaming in real-time</li>
+          <li>All subsequent events arrive as <code>SEVENT</code> (same format, includes id)</li>
+        </ol>
+        <p>The client persists the last id it received. On reconnect it sends <code>FROM &lt;that_id&gt;</code> and picks up exactly where it left off.</p>
+
+        <h3>Example</h3>
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">text</span><button class="copy-btn">Copy</button></div>
+          <pre><code class="language-plaintext"># First session — subscribe from beginning
+SUBSCRIBE orders:* FROM 0
+SUBSCRIBED orders:* 3        ← 3 historical events incoming
+SEVENT orders:1 101 {"total":49.99}
+SEVENT orders:2 102 {"total":12.00}
+SEVENT orders:3 105 {"total":8.50}
+LIVE                         ← caught up, now streaming live
+SEVENT orders:4 201 {"total":99.00}   ← new event arrives
+
+# Client saves cursor: 201
+
+# After reconnect — resume without missing anything
+SUBSCRIBE orders:* FROM 201
+SUBSCRIBED orders:* 0        ← nothing missed
+LIVE
+SEVENT orders:5 202 {"total":5.00}    ← continues from here</code></pre>
+        </div>
+
+        <h3>vs WATCH</h3>
+        <table>
+          <thead><tr><th></th><th>WATCH</th><th>SUBSCRIBE</th></tr></thead>
+          <tbody>
+            <tr><td>Survives reconnect</td><td>No — events missed while offline</td><td>Yes — replay from cursor</td></tr>
+            <tr><td>Event format</td><td><code>EVENT &lt;stream&gt; &lt;payload&gt;</code></td><td><code>SEVENT &lt;stream&gt; &lt;id&gt; &lt;payload&gt;</code></td></tr>
+            <tr><td>History replay</td><td>No</td><td>Yes</td></tr>
+            <tr><td>Use when</td><td>Ephemeral UI updates, presence</td><td>Any data that must not be lost</td></tr>
+          </tbody>
+        </table>
+
+        <h3>Notes</h3>
+        <ul>
+          <li>History is replayed from <strong>in-memory</strong> event log (bounded by <code>max_history_per_stream</code>). For very old events beyond the in-memory window, use <code>SINCE</code> to replay from the WAL first.</li>
+          <li>The token must have <code>can_since = true</code> (the default) to use SUBSCRIBE.</li>
+          <li><code>FROM 0</code> replays all available in-memory history.</li>
+          <li>Pattern wildcards work the same as WATCH — e.g. <code>orders:*</code>, <code>*</code>.</li>
+        </ul>
+      </section>
+
+      <!-- ─── Durable Queues ──────────────────────────────── -->
+      <section id="durable-queues">
+        <h2>Durable Queues</h2>
+        <p>SaturnDB has a built-in at-least-once job queue — no separate Redis or BullMQ needed. Jobs survive restarts (persisted in snapshots) and are automatically re-queued if a worker crashes before ACKing.</p>
+
+        <h3>How it works</h3>
+        <ol>
+          <li>Producer calls <code>ENQUEUE &lt;queue&gt; &lt;json&gt;</code> — server returns a unique job id.</li>
+          <li>Worker calls <code>DEQUEUE &lt;queue&gt; [timeout_secs]</code> — claims the next job, making it invisible for <code>timeout_secs</code> (default 30s).</li>
+          <li>Worker processes the job, then calls <code>ACK &lt;queue&gt; &lt;id&gt;</code> to permanently remove it.</li>
+          <li>If the worker crashes or calls <code>NACK</code>, the job is returned to the front of the queue with an incremented retry counter.</li>
+          <li>If the worker takes longer than <code>timeout_secs</code>, the job is automatically re-queued (checked every second).</li>
+        </ol>
+
+        <h3>Commands</h3>
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">text</span><button class="copy-btn">Copy</button></div>
+          <pre><code class="language-plaintext"># Producer
+ENQUEUE jobs:email {"to":"user@example.com","subject":"Welcome"}
+OK 1001                  ← server-assigned job id
+
+# Worker
+DEQUEUE jobs:email 60    ← claim for up to 60 seconds
+JOB 1001 {"to":"user@example.com","subject":"Welcome"}
+
+# Success — remove permanently
+ACK jobs:email 1001
+OK
+
+# Failure — return to queue for retry
+NACK jobs:email 1001
+OK
+
+# Inspect queue
+QLEN  jobs:email         → COUNT 3   (pending + in-flight)
+QPEEK jobs:email         → JOB 1002 {...}  (peek without claiming)</code></pre>
+        </div>
+
+        <h3>Long-poll DEQUEUE</h3>
+        <p>Add <code>WAIT [secs]</code> to block until a job is available — or until the timeout expires. This eliminates polling loops in workers and lets the server push jobs the instant they arrive.</p>
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">text</span><button class="copy-btn">Copy</button></div>
+          <pre><code class="language-plaintext"># Block up to 30 seconds (default) waiting for the next job
+DEQUEUE jobs:email WAIT
+
+# Block up to 10 seconds, claim with 60s visibility timeout
+DEQUEUE jobs:email WAIT 10 60
+
+# If a job arrives within the wait window:
+JOB 1005 {"to":"user@example.com"}
+
+# If no job arrives:
+EMPTY</code></pre>
+        </div>
+        <div class="callout tip">
+          <p>Long-poll DEQUEUE never blocks the connection — the server keeps it alive for WATCH events and disconnection during the wait. Multiple workers can all WAIT on the same queue and each gets a unique job.</p>
+        </div>
+
+        <h3>Visibility Timeout</h3>
+        <p>The optional <code>timeout_secs</code> argument to <code>DEQUEUE</code> controls how long a job stays invisible while a worker holds it. Defaults to <strong>30 seconds</strong>. If the worker does not ACK or NACK within that window, the server automatically returns the job to the front of the queue.</p>
+        <div class="callout tip">
+          <p>Set the timeout to at least 2× your expected processing time. For long tasks, call NACK and re-DEQUEUE to reset the clock.</p>
+        </div>
+
+        <h3>Persistence &amp; Restart Safety</h3>
+        <p>All pending jobs are saved in <code>saturn-snapshot.json</code>. In-flight jobs (claimed but not yet ACKed) are converted back to pending on restart — workers will re-process them. This guarantees <strong>at-least-once delivery</strong>.</p>
+
+        <h3>Access Control</h3>
+        <ul>
+          <li><code>ENQUEUE</code>, <code>DEQUEUE</code>, <code>ACK</code>, <code>NACK</code> — require write permission on the queue namespace.</li>
+          <li><code>QLEN</code>, <code>QPEEK</code> — require read permission.</li>
+          <li>Queue names follow the same <code>namespace:name</code> convention as streams (e.g. <code>jobs:email</code>).</li>
+        </ul>
+      </section>
+
+      <!-- ─── Geospatial ──────────────────────────────────── -->
+      <section id="geospatial">
+        <h2>Geospatial Queries</h2>
+        <p>SaturnDB has a built-in geo index that stores a latitude/longitude position per stream. Positions are indexed in memory and persisted in snapshots. Radius searches use the <strong>Haversine formula</strong> (Earth radius 6371 km) — no external dependency.</p>
+
+        <h3>Auto-indexing</h3>
+        <p>Any <code>EMIT</code> or <code>PATCH</code> whose JSON payload contains numeric <code>lat</code> and <code>lng</code> fields is automatically indexed. No extra command needed.</p>
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">text</span><button class="copy-btn">Copy</button></div>
+          <pre><code class="language-plaintext">EMIT devices:42 {"lat": 48.8566, "lng": 2.3522, "status": "active"}
+OK
+# ↑ position is now in the geo index automatically</code></pre>
+        </div>
+
+        <h3>Commands</h3>
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">text</span><button class="copy-btn">Copy</button></div>
+          <pre><code class="language-plaintext"># Explicitly set a position
+GEO SET devices:42 48.8566 2.3522
+OK
+
+# Get position
+GEO GET devices:42
+GEO_POS 48.8566 2.3522
+
+# Radius search — all streams matching pattern within N km, sorted by distance
+GEO NEAR devices:* 48.85 2.35 5.0
+GEO_RESULT devices:42 48.8566 2.3522 0.083421
+GEO_RESULT devices:7  48.8901 2.3100 4.218034
+GEO_END
+
+# Distance between two streams
+GEO DIST devices:42 devices:7
+GEO_DIST 4.218034
+
+# Remove from geo index
+GEO DEL devices:42
+OK</code></pre>
+        </div>
+
+        <h3>Access Control</h3>
+        <ul>
+          <li><code>GEO SET</code> / <code>GEO DEL</code> — requires write permission on the stream's namespace</li>
+          <li><code>GEO GET</code> / <code>GEO NEAR</code> / <code>GEO DIST</code> — requires read permission</li>
+          <li>Auto-indexing on EMIT/PATCH uses the same auth check as the write itself — no extra grants needed</li>
+        </ul>
+
+        <h3>Persistence</h3>
+        <p>Geo positions are saved in <code>saturn-snapshot.json</code> alongside stream data and survive server restarts. Positions are also removed from the index when a stream is expired or evicted.</p>
+
+        <h3>Clustering</h3>
+        <p>The geo index is per-node. <code>GEO NEAR</code> queries the local node only. In a clustered setup, emit to the shard that owns the stream — that node auto-indexes the position. For a globally consistent radius search across shards, query each node separately and merge client-side (scatter-gather for GEO NEAR is planned for V2).</p>
+      </section>
+
+      <!-- ─── Protocol ─────────────────────────────────── -->
+      <section id="protocol">
+        <h2>Protocol &amp; Commands</h2>
+        <p>SaturnDB uses a compact binary wire protocol that is auto-detected per connection. A legacy text mode is also supported for debugging.</p>
+
+        <div id="wire-protocol">
+          <h3>Wire Protocol</h3>
+          <div class="callout">
+            <p><strong>Binary frame format:</strong> <code>[1B opcode] [4B body_len] [body]</code><br>
+            The protocol is auto-detected per connection — binary is used when available, with backward-compatible text mode for CLI and debugging.</p>
+          </div>
+        </div>
+
+        <div id="commands">
+          <h3>Commands</h3>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Command</th><th>Syntax</th><th>Description</th></tr></thead>
+              <tbody>
+                <tr><td><code>AUTH</code></td><td><code>AUTH &lt;token&gt;</code></td><td>Authenticate connection. SDKs do this automatically.</td></tr>
+                <tr><td><code>EMIT</code></td><td><code>EMIT &lt;stream&gt; &lt;json&gt;</code></td><td>Append an event to a stream and fan out to all watchers.</td></tr>
+                <tr><td><code>PATCH</code></td><td><code>PATCH &lt;stream&gt; &lt;json&gt;</code></td><td>Merge fields into the latest event. Supports <code>$inc</code>, <code>$push</code>, <code>$pop</code>, <code>$unset</code>, <code>$mul</code>, <code>$min</code>, <code>$max</code> operators.</td></tr>
+                <tr><td><code>GET</code></td><td><code>GET &lt;stream&gt;</code></td><td>Read the latest event from a stream.</td></tr>
+                <tr><td><code>WATCH</code></td><td><code>WATCH &lt;pattern&gt;</code></td><td>Subscribe to a pattern. Supports <code>*</code> wildcard, e.g. <code>users:*</code>.</td></tr>
+                <tr><td><code>SINCE</code></td><td><code>SINCE &lt;stream&gt; &lt;ts&gt;</code></td><td>Replay history from a Unix microsecond timestamp. Use <code>0</code> for full history.</td></tr>
+                <tr><td><code>DEL</code></td><td><code>DEL &lt;stream&gt;</code></td><td>Tombstone delete. History is preserved; current state becomes deleted.</td></tr>
+                <tr><td><code>KEYS</code></td><td><code>KEYS &lt;pattern&gt;</code></td><td>List all stream names matching a glob pattern.</td></tr>
+                <tr><td><code>EXPIRE</code></td><td><code>EXPIRE &lt;stream&gt; &lt;secs&gt;</code></td><td>Auto-delete the stream after N seconds.</td></tr>
+                <tr><td><code>QUERY</code></td><td><code>QUERY &lt;pattern&gt; WHERE &lt;field&gt; &lt;op&gt; &lt;value&gt;</code></td><td>Filter streams by a field value. See operators below.</td></tr>
+                <tr><td><code>BEGIN</code></td><td><code>BEGIN</code></td><td>Start a transaction buffer.</td></tr>
+                <tr><td><code>COMMIT</code></td><td><code>COMMIT</code></td><td>Commit all buffered commands atomically.</td></tr>
+                <tr><td><code>ROLLBACK</code></td><td><code>ROLLBACK</code></td><td>Discard all buffered commands.</td></tr>
+                <tr><td><code>PING</code></td><td><code>PING</code></td><td>Health check. Returns <code>PONG</code>.</td></tr>
+                <tr><td><code>TOKEN CREATE</code></td><td><code>TOKEN CREATE &lt;token&gt; &lt;role&gt; [ns1,ns2] [expires_at]</code></td><td>Dynamically create a new token.</td></tr>
+                <tr><td><code>TOKEN REVOKE</code></td><td><code>TOKEN REVOKE &lt;token&gt;</code></td><td>Revoke a token immediately.</td></tr>
+                <tr><td><code>TOKEN LIST</code></td><td><code>TOKEN LIST</code></td><td>List all active tokens.</td></tr>
+                <tr><td><code>CLAIM</code></td><td><code>CLAIM &lt;stream&gt;</code></td><td>Claim write ownership of a stream. Requires JWT session. Only the owner or admin can write after claiming.</td></tr>
+                <tr><td><code>WHEN TOKEN</code></td><td><code>WHEN TOKEN &lt;pattern&gt; &lt;token_tmpl&gt; &lt;role&gt; [ns1,ns2]</code></td><td>Auto-create a token whenever a matching stream is written. Admin only.</td></tr>
+                <tr><td><code>WHEN TOKEN DEL</code></td><td><code>WHEN TOKEN DEL &lt;pattern&gt; &lt;token_tmpl&gt;</code></td><td>Remove a token template rule.</td></tr>
+                <tr><td><code>WHEN TOKEN LIST</code></td><td><code>WHEN TOKEN LIST</code></td><td>List all token template rules.</td></tr>
+                <tr><td><code>GEO SET</code></td><td><code>GEO SET &lt;stream&gt; &lt;lat&gt; &lt;lng&gt;</code></td><td>Set a stream's geographic position. Also auto-indexed on EMIT/PATCH if payload has <code>lat</code> + <code>lng</code> fields.</td></tr>
+                <tr><td><code>GEO GET</code></td><td><code>GEO GET &lt;stream&gt;</code></td><td>Get a stream's position. Returns <code>GEO_POS &lt;lat&gt; &lt;lng&gt;</code> or <code>NULL</code>.</td></tr>
+                <tr><td><code>GEO DEL</code></td><td><code>GEO DEL &lt;stream&gt;</code></td><td>Remove a stream from the geo index.</td></tr>
+                <tr><td><code>GEO NEAR</code></td><td><code>GEO NEAR &lt;pattern&gt; &lt;lat&gt; &lt;lng&gt; &lt;radius_km&gt;</code></td><td>Radius search. Returns <code>GEO_RESULT</code> rows sorted by distance, then <code>GEO_END</code>.</td></tr>
+                <tr><td><code>GEO DIST</code></td><td><code>GEO DIST &lt;stream1&gt; &lt;stream2&gt;</code></td><td>Haversine distance in km between two streams.</td></tr>
+                <tr><td><code>SUBSCRIBE</code></td><td><code>SUBSCRIBE &lt;pattern&gt; FROM &lt;last_event_id&gt;</code></td><td>Replay history from <code>last_event_id</code> then stream live events. <code>FROM 0</code> replays all available history. Events include their ID for cursor tracking.</td></tr>
+                <tr><td><code>ENQUEUE</code></td><td><code>ENQUEUE &lt;queue&gt; &lt;json&gt;</code></td><td>Push a job onto the queue. Returns <code>OK &lt;job_id&gt;</code>.</td></tr>
+                <tr><td><code>DEQUEUE</code></td><td><code>DEQUEUE &lt;queue&gt; [WAIT [wait_secs]] [timeout_secs]</code></td><td>Claim the next job. Returns <code>JOB &lt;id&gt; &lt;json&gt;</code> or <code>EMPTY</code>. Add <code>WAIT</code> to long-poll until a job arrives. Default vis timeout 30s.</td></tr>
+                <tr><td><code>ACK</code></td><td><code>ACK &lt;queue&gt; &lt;job_id&gt;</code></td><td>Permanently remove a claimed job.</td></tr>
+                <tr><td><code>NACK</code></td><td><code>NACK &lt;queue&gt; &lt;job_id&gt;</code></td><td>Return job to front of queue for retry. Increments retry counter.</td></tr>
+                <tr><td><code>QLEN</code></td><td><code>QLEN &lt;queue&gt;</code></td><td>Pending + in-flight job count.</td></tr>
+                <tr><td><code>QPEEK</code></td><td><code>QPEEK &lt;queue&gt;</code></td><td>Peek at next job without claiming it.</td></tr>
+                <tr><td><code>MGET</code></td><td><code>MGET &lt;stream&gt; [stream ...]</code></td><td>Batch read multiple streams. Returns one <code>VALUE &lt;stream&gt; &lt;json&gt;</code> or <code>NULL &lt;stream&gt;</code> line per stream.</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h3>QUERY Operators</h3>
+          <p>QUERY filters stream <em>payloads</em> by a top-level JSON field. Supported operators:</p>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Operator</th><th>Description</th></tr></thead>
+              <tbody>
+                <tr><td><code>=</code></td><td>Exact equality</td></tr>
+                <tr><td><code>!=</code></td><td>Not equal</td></tr>
+                <tr><td><code>&gt;</code> <code>&gt;=</code> <code>&lt;</code> <code>&lt;=</code></td><td>Numeric comparisons</td></tr>
+                <tr><td><code>CONTAINS</code></td><td>String contains substring (case-sensitive)</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">text</span><button class="copy-btn">Copy</button></div>
+            <pre><code class="language-plaintext">QUERY orders:* WHERE status = pending
+QUERY users:*  WHERE age >= 18
+QUERY logs:*   WHERE message CONTAINS error</code></pre>
+          </div>
+        </div>
+
+        <div id="responses">
+          <h3>Responses</h3>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Response</th><th>When</th></tr></thead>
+              <tbody>
+                <tr><td><code>OK</code></td><td>Command succeeded with no data to return</td></tr>
+                <tr><td><code>PONG</code></td><td>Response to PING</td></tr>
+                <tr><td><code>VALUE &lt;json&gt;</code></td><td>Response to GET — the latest event payload</td></tr>
+                <tr><td><code>NULL</code></td><td>Stream exists but has been deleted</td></tr>
+                <tr><td><code>EMPTY</code></td><td>Stream does not exist</td></tr>
+                <tr><td><code>QUEUED</code></td><td>Command accepted inside a transaction</td></tr>
+                <tr><td><code>EVENT &lt;stream&gt; &lt;json&gt;</code></td><td>Pushed to WATCH subscribers on each new event</td></tr>
+                <tr><td><code>ROW &lt;stream&gt; &lt;json&gt;</code></td><td>One result row from a QUERY or SINCE</td></tr>
+                <tr><td><code>KEY &lt;stream&gt;</code></td><td>One result from KEYS</td></tr>
+                <tr><td><code>WATCHING &lt;pattern&gt;</code></td><td>Confirms subscription is active</td></tr>
+                <tr><td><code>TOKEN &lt;raw&gt; &lt;role&gt; &lt;ns&gt;</code></td><td>Response to TOKEN CREATE</td></tr>
+                <tr><td><code>TOKEN_RULE &lt;pattern&gt; &lt;tmpl&gt; &lt;role&gt; &lt;ns&gt;</code></td><td>One result row from WHEN TOKEN LIST</td></tr>
+                <tr><td><code>GEO_POS &lt;lat&gt; &lt;lng&gt;</code></td><td>Position from GEO GET</td></tr>
+                <tr><td><code>GEO_RESULT &lt;stream&gt; &lt;lat&gt; &lt;lng&gt; &lt;dist_km&gt;</code></td><td>One result from GEO NEAR, sorted by distance</td></tr>
+                <tr><td><code>GEO_END</code></td><td>End of GEO NEAR results</td></tr>
+                <tr><td><code>GEO_DIST &lt;km&gt;</code></td><td>Distance from GEO DIST</td></tr>
+                <tr><td><code>SUBSCRIBED &lt;pattern&gt; &lt;count&gt;</code></td><td>Confirms SUBSCRIBE, with count of history events about to be replayed</td></tr>
+                <tr><td><code>SEVENT &lt;stream&gt; &lt;id&gt; &lt;payload&gt;</code></td><td>Subscribe event — includes event ID for cursor tracking (both history and live)</td></tr>
+                <tr><td><code>LIVE</code></td><td>End of history replay; subsequent SEVENTs are live</td></tr>
+                <tr><td><code>JOB &lt;id&gt; &lt;payload&gt;</code></td><td>Response to DEQUEUE or QPEEK</td></tr>
+                <tr><td><code>ERR &lt;message&gt;</code></td><td>Error — auth failure, malformed command, etc.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div id="transactions">
+          <h3>Transactions</h3>
+          <p>Transactions allow you to batch multiple writes into a single atomic operation. Commands inside a transaction return <code>QUEUED</code>. A client disconnect automatically triggers a rollback.</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">text</span><button class="copy-btn">Copy</button></div>
+            <pre><code class="language-plaintext">BEGIN
+EMIT orders:1    {"item":"book","qty":2,"status":"confirmed"}
+EMIT inventory:book {"stock":98}
+EMIT audit:1     {"action":"order_placed","order":"orders:1"}
+COMMIT</code></pre>
+          </div>
+          <div class="callout tip">
+            <p>Use transactions any time you need multiple streams to stay in sync — e.g. order creation that simultaneously updates inventory and an audit log.</p>
+          </div>
+        </div>
+
+        <div id="patch-operators">
+          <h3>PATCH Operators</h3>
+          <p><code>PATCH</code> supports atomic field-level operators in addition to plain merging. A field whose value is a JSON object with only <code>$</code>-prefixed keys is treated as an operator — applied server-side with no read-modify-write round trip needed.</p>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Operator</th><th>Example</th><th>Effect</th></tr></thead>
+              <tbody>
+                <tr><td><code>$inc</code></td><td><code>{"views": {"$inc": 1}}</code></td><td>Add N to a numeric field. Creates the field at N if missing.</td></tr>
+                <tr><td><code>$mul</code></td><td><code>{"price": {"$mul": 1.1}}</code></td><td>Multiply field by N.</td></tr>
+                <tr><td><code>$min</code></td><td><code>{"temp": {"$min": 0}}</code></td><td>Set to the smaller of current and N.</td></tr>
+                <tr><td><code>$max</code></td><td><code>{"score": {"$max": 100}}</code></td><td>Set to the larger of current and N.</td></tr>
+                <tr><td><code>$push</code></td><td><code>{"tags": {"$push": "vip"}}</code></td><td>Append a value to an array field. Creates the array if missing.</td></tr>
+                <tr><td><code>$pop</code></td><td><code>{"queue": {"$pop": "first"}}</code></td><td>Remove from array. <code>"first"</code> or <code>"last"</code> (default).</td></tr>
+                <tr><td><code>$unset</code></td><td><code>{"tmp": {"$unset": true}}</code></td><td>Delete the field.</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">text</span><button class="copy-btn">Copy</button></div>
+            <pre><code class="language-plaintext">EMIT stats:user:42 {"rides": 0, "rating": 5.0, "tags": []}
+OK
+
+PATCH stats:user:42 {"rides": {"$inc": 1}}
+OK
+PATCH stats:user:42 {"rating": {"$min": 4.8}}
+OK
+PATCH stats:user:42 {"tags": {"$push": "frequent"}}
+OK
+
+GET stats:user:42
+VALUE {"rides":1,"rating":4.8,"tags":["frequent"]}</code></pre>
+          </div>
+          <p>Operators work inside transactions too — each <code>PATCH</code> returns <code>QUEUED</code> and all operations are applied atomically on <code>COMMIT</code>.</p>
+        </div>
+      </section>
+
+      <!-- ─── SDKs ─────────────────────────────────── -->
+      <section id="sdks">
+        <h2>SDK Reference</h2>
+        <p>All SDKs share an identical <code>SaturnDBClient(host, port, token)</code> API. Authentication is sent automatically on connect. All clients auto-reconnect with exponential backoff and re-subscribe to all WATCH patterns after reconnect.</p>
+
+        <div class="table-wrap" style="margin-bottom:24px">
+          <table>
+            <thead><tr><th>Method</th><th>Description</th></tr></thead>
+            <tbody>
+              <tr><td><code>connect()</code></td><td>Open TCP connection and authenticate</td></tr>
+              <tr><td><code>emit(stream, payload)</code></td><td>Write an event to a stream</td></tr>
+              <tr><td><code>get(stream)</code></td><td>Read the latest event from a stream</td></tr>
+              <tr><td><code>watch(pattern, handler)</code></td><td>Subscribe to a pattern; handler called on every new event</td></tr>
+              <tr><td><code>since(stream, ts)</code></td><td>Replay history from timestamp (Unix micros, <code>0</code> = all)</td></tr>
+              <tr><td><code>del(stream)</code></td><td>Tombstone delete a stream</td></tr>
+              <tr><td><code>ping()</code></td><td>Health check</td></tr>
+              <tr><td><code>disconnect()</code></td><td>Close connection gracefully</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="lang-tabs">
+          <div class="tab-nav">
+            <button class="tab-btn active" data-tab="js">JavaScript</button>
+            <button class="tab-btn" data-tab="python">Python</button>
+            <button class="tab-btn" data-tab="dart">Dart</button>
+          </div>
+
+          <div class="tab-panel active" id="tab-js" data-panel="js">
+            <div id="sdk-js">
+              <p style="margin-top:16px">Node.js SDK located at <code>sdk/js/saturn.js</code>. Uses raw TCP sockets with pipelining. Works in any Node.js environment.</p>
+              <div class="code-block">
+                <div class="code-header"><span class="code-lang">javascript</span><button class="copy-btn">Copy</button></div>
+                <pre><code class="language-javascript">const { SaturnDBClient } = require('./sdk/js/saturn.js');
+
+const client = new SaturnDBClient('127.0.0.1', 7379, 'my-token');
+await client.connect();
+
+// Write an event
+await client.emit('chat:1', { user: 'alice', text: 'hello world' });
+
+// Read latest state
+const msg = await client.get('chat:1');
+console.log(msg); // { user: 'alice', text: 'hello world' }
+
+// Subscribe to a pattern
+await client.watch('chat:*', (stream, data) => {
+  console.log(`[${stream}]`, data);
+});
+
+// Replay history from the beginning
+const history = await client.since('chat:1', 0);
+// history is an array of { stream, payload, ts } objects
+
+// Clean up
+await client.disconnect();</code></pre>
+              </div>
+            </div>
+          </div>
+
+          <div class="tab-panel" id="tab-python" data-panel="python">
+            <div id="sdk-python">
+              <p style="margin-top:16px">Python SDK located at <code>sdk/python/saturn.py</code>. Async/await based using <code>asyncio</code>. Requires Python 3.8+.</p>
+              <div class="code-block">
+                <div class="code-header"><span class="code-lang">python</span><button class="copy-btn">Copy</button></div>
+                <pre><code class="language-python">from saturn import SaturnDBClient
+import asyncio
+
+async def main():
+    client = SaturnDBClient('127.0.0.1', 7379, 'my-token')
+    await client.connect()
+
+    # Write an event
+    await client.emit('users:1', {'name': 'alice', 'online': True})
+
+    # Read latest state
+    user = await client.get('users:1')
+    print(user)  # {'name': 'alice', 'online': True}
+
+    # Subscribe to a pattern
+    await client.watch('users:*', lambda stream, data: print(stream, data))
+
+    # Replay history
+    history = await client.since('users:1', 0)
+
+    await client.disconnect()
+
+asyncio.run(main())</code></pre>
+              </div>
+            </div>
+          </div>
+
+          <div class="tab-panel" id="tab-dart" data-panel="dart">
+            <div id="sdk-dart">
+              <p style="margin-top:16px">Dart/Flutter SDK located at <code>sdk/dart/saturn.dart</code>. Works on mobile, desktop, and web (via WebSocket on port 7380).</p>
+              <div class="code-block">
+                <div class="code-header"><span class="code-lang">dart</span><button class="copy-btn">Copy</button></div>
+                <pre><code class="language-dart">import 'saturn.dart';
+
+void main() async {
+  final client = SaturnDBClient('127.0.0.1', 7379, 'my-token');
+  await client.connect();
+
+  // Write an event
+  await client.emit('users:1', {'name': 'alice', 'online': true});
+
+  // Read latest state
+  final user = await client.get('users:1');
+  print(user); // {name: alice, online: true}
+
+  // Subscribe to a pattern
+  await client.watch('users:*', (stream, data) {
+    print('$stream: $data');
+  });
+
+  // Replay history
+  final history = await client.since('users:1', 0);
+
+  await client.disconnect();
+}</code></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ─── Architecture ─────────────────────────────────── -->
+      <section id="architecture">
+        <h2>Architecture</h2>
+        <p>SaturnDB is a single-binary server with no external dependencies. The core is a set of cooperating async actors communicating over tokio mpsc channels.</p>
+
+        <div id="modules">
+          <h3>Module Overview</h3>
+          <div class="module-list">
+            <div class="module-card">
+              <div class="mod-name">Event</div>
+              <div><span class="mod-file">event.rs</span></div>
+              <div class="mod-desc">The core data structure: <code>id</code>, <code>ts</code> (Unix micros), <code>stream</code>, <code>op</code> (Set / Delete / Patch), <code>payload</code>.</div>
+            </div>
+            <div class="module-card">
+              <div class="mod-name">Log</div>
+              <div><span class="mod-file">log.rs</span></div>
+              <div class="mod-desc">Append-only WAL. Every write appends one JSON line to <code>saturn.log</code>. WAL actor uses mpsc + group commit: N concurrent EMITs → 1 syscall.</div>
+            </div>
+            <div class="module-card">
+              <div class="mod-name">Index</div>
+              <div><span class="mod-file">index.rs</span></div>
+              <div class="mod-desc">In-memory index: stream → Vec&lt;Event&gt;. O(1) reads. Holds expiry and deleted maps. Built from snapshot + WAL on startup.</div>
+            </div>
+            <div class="module-card">
+              <div class="mod-name">Broker</div>
+              <div><span class="mod-file">broker.rs</span></div>
+              <div class="mod-desc">Pub/sub fan-out. Pattern-aware — <code>users:*</code> matches all user streams. Each pattern has a tokio broadcast channel.</div>
+            </div>
+            <div class="module-card">
+              <div class="mod-name">Protocol</div>
+              <div><span class="mod-file">protocol.rs</span></div>
+              <div class="mod-desc">Command parser. Reads binary or text frames and produces a typed <code>Command</code> enum consumed by the handler.</div>
+            </div>
+            <div class="module-card">
+              <div class="mod-name">Server</div>
+              <div><span class="mod-file">server.rs</span></div>
+              <div class="mod-desc">TCP listener. One tokio task per client. Dispatches commands to log, index, and broker. Handles TLS or plain TCP based on config.</div>
+            </div>
+            <div class="module-card">
+              <div class="mod-name">Auth</div>
+              <div><span class="mod-file">auth.rs</span></div>
+              <div class="mod-desc">Token store. Validates roles, namespace access, and token expiry on every command.</div>
+            </div>
+            <div class="module-card">
+              <div class="mod-name">Snapshot</div>
+              <div><span class="mod-file">snapshot.rs</span></div>
+              <div class="mod-desc">Periodic snapshots to <code>saturn-snapshot.json</code>. On startup, loads snapshot then replays only new events — fast regardless of log size.</div>
+            </div>
+            <div class="module-card">
+              <div class="mod-name">WS Proxy</div>
+              <div><span class="mod-file">ws_proxy.rs</span></div>
+              <div class="mod-desc">WebSocket → TCP proxy on port 7380. Embedded in the server binary — no separate process needed for browser clients.</div>
+            </div>
+          </div>
+        </div>
+
+        <div id="wal-snapshots">
+          <h3>WAL &amp; Snapshots</h3>
+          <p>Every write appends one JSON line to <code>saturn.log</code>. The WAL actor batches concurrent writes using a group commit: many parallel EMITs collapse into a single <code>fsync</code> (sync mode) or fire-and-forget (async mode).</p>
+          <p>Snapshots save the full in-memory index state to <code>saturn-snapshot.json</code> every N events. On startup, SaturnDB loads the snapshot first, then replays only the WAL entries that arrived after the snapshot — keeping startup fast even with large logs.</p>
+
+          <div class="wal-grid">
+            <div class="wal-card">
+              <h4><span class="dot" style="background:#F59E0B"></span>Async WAL</h4>
+              <div class="big">~55k ops/s</div>
+              <p>Fire-and-forget. Highest throughput. Best for most use cases where occasional data loss on hard crash is acceptable.</p>
+              <div style="margin-top:10px"><code>wal_mode = "async"</code></div>
+            </div>
+            <div class="wal-card">
+              <h4><span class="dot" style="background:#10B981"></span>Sync WAL</h4>
+              <div class="big">Durable</div>
+              <p>Fsync on every write. Lower throughput but every committed event is on disk. Use for financial or auction data.</p>
+              <div style="margin-top:10px"><code>wal_mode = "sync"</code></div>
+            </div>
+          </div>
+        </div>
+
+        <div id="performance">
+          <h3>Performance</h3>
+          <p>Single-node benchmarks on loopback, async WAL, mimalloc allocator.</p>
+
+          <div class="perf-grid">
+            <div class="perf-card">
+              <div class="perf-value">55k</div>
+              <div class="perf-label">Peak EMIT/s</div>
+              <div class="perf-sub">c=100, connection pool</div>
+            </div>
+            <div class="perf-card">
+              <div class="perf-value">58k</div>
+              <div class="perf-label">Peak GET/s</div>
+              <div class="perf-sub">c=100, connection pool</div>
+            </div>
+            <div class="perf-card">
+              <div class="perf-value">0.057ms</div>
+              <div class="perf-label">EMIT p50</div>
+              <div class="perf-sub">median latency</div>
+            </div>
+            <div class="perf-card">
+              <div class="perf-value">~7ms</div>
+              <div class="perf-label">EMIT p99</div>
+              <div class="perf-sub">under full load</div>
+            </div>
+            <div class="perf-card">
+              <div class="perf-value">30k</div>
+              <div class="perf-label">Sustained ops/s</div>
+              <div class="perf-sub">0 errors, stable</div>
+            </div>
+            <div class="perf-card">
+              <div class="perf-value">11k</div>
+              <div class="perf-label">Concurrent users</div>
+              <div class="perf-sub">5 ops/sec each</div>
+            </div>
+          </div>
+
+          <div class="callout tip">
+            <p><strong>Spike recovery:</strong> 200 concurrent burst with no errors — p99 recovers within milliseconds as the group commit absorbs the load spike.</p>
+          </div>
+        </div>
+
+        <div id="design-decisions">
+          <h3>Design Decisions</h3>
+
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Decision</th><th>Rationale</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><strong>Append-only log</strong></td>
+                  <td>Never mutate history. Current state = last event per stream. Makes time-travel and audit trivial.</td>
+                </tr>
+                <tr>
+                  <td><strong>No schema</strong></td>
+                  <td>Any JSON payload, any stream name. Zero configuration to start writing data.</td>
+                </tr>
+                <tr>
+                  <td><strong>Stream naming convention</strong></td>
+                  <td><code>namespace:id</code> (e.g. <code>users:123</code>, <code>chat:room1</code>) enables namespace-scoped tokens and wildcard subscriptions.</td>
+                </tr>
+                <tr>
+                  <td><strong>Embedded WebSocket proxy</strong></td>
+                  <td>Browsers connect on port 7380 — no separate process, no config. The same binary handles TCP and WS.</td>
+                </tr>
+                <tr>
+                  <td><strong>mimalloc allocator</strong></td>
+                  <td>Global allocator override. Measurable throughput improvement over the system allocator under high concurrency.</td>
+                </tr>
+                <tr>
+                  <td><strong>TLS off by default</strong></td>
+                  <td>Plain TCP for local dev. When <code>tls = true</code>, a self-signed cert is auto-generated — no manual cert setup.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+    </div><!-- /content -->
+  </main>
+
+  <!-- ─── Right TOC ─────────────────────────────────── -->
+  <div class="toc-wrap">
+    <nav class="toc-inner">
+      <div class="toc-title">On this page</div>
+      <a href="#introduction" class="toc-link">Introduction</a>
+      <a href="#getting-started" class="toc-link">Getting Started</a>
+      <a href="#installation" class="toc-link sub">Installation</a>
+      <a href="#running-server" class="toc-link sub">Running the Server</a>
+      <a href="#cli-usage" class="toc-link sub">CLI Usage</a>
+      <a href="#quick-start" class="toc-link sub">Quick Start</a>
+      <a href="#configuration" class="toc-link">Configuration</a>
+      <a href="#config-reference" class="toc-link sub">Config Reference</a>
+      <a href="#roles-tokens" class="toc-link sub">Roles &amp; Tokens</a>
+      <a href="#security" class="toc-link">Security</a>
+      <a href="#jwt-auth" class="toc-link sub">JWT Auth</a>
+      <a href="#stream-ownership" class="toc-link sub">Stream Ownership</a>
+      <a href="#token-templates" class="toc-link sub">Token Templates</a>
+      <a href="#security-hardening" class="toc-link sub">Hardening</a>
+      <a href="#durable-subscriptions" class="toc-link">Durable Subscriptions</a>
+      <a href="#durable-queues" class="toc-link">Durable Queues</a>
+      <a href="#geospatial" class="toc-link">Geospatial</a>
+      <a href="#protocol" class="toc-link">Protocol &amp; Commands</a>
+      <a href="#wire-protocol" class="toc-link sub">Wire Protocol</a>
+      <a href="#commands" class="toc-link sub">Commands</a>
+      <a href="#responses" class="toc-link sub">Responses</a>
+      <a href="#transactions" class="toc-link sub">Transactions</a>
+      <a href="#patch-operators" class="toc-link sub">PATCH Operators</a>
+      <a href="#sdks" class="toc-link">SDK Reference</a>
+      <a href="#sdk-js" class="toc-link sub">JavaScript</a>
+      <a href="#sdk-python" class="toc-link sub">Python</a>
+      <a href="#sdk-dart" class="toc-link sub">Dart</a>
+      <a href="#architecture" class="toc-link">Architecture</a>
+      <a href="#modules" class="toc-link sub">Modules</a>
+      <a href="#wal-snapshots" class="toc-link sub">WAL &amp; Snapshots</a>
+      <a href="#performance" class="toc-link sub">Performance</a>
+      <a href="#design-decisions" class="toc-link sub">Design Decisions</a>
+    </nav>
+  </div>
+</div><!-- /page-body -->
+
+<script>
+  // ─── highlight.js ───────────────────────────────────
+  // Scope to code blocks only — don't clobber inline <code> tags
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.code-block pre code').forEach(el => {
+      hljs.highlightElement(el);
+    });
+  });
+
+  // ─── Mobile sidebar ──────────────────────────────────
+  const sidebar  = document.getElementById('sidebar');
+  const overlay  = document.getElementById('overlay');
+  const menuBtn  = document.getElementById('menuBtn');
+
+  function openSidebar() {
+    sidebar.classList.add('open');
+    overlay.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeSidebar() {
+    sidebar.classList.remove('open');
+    overlay.classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  menuBtn.addEventListener('click', () => sidebar.classList.contains('open') ? closeSidebar() : openSidebar());
+  overlay.addEventListener('click', closeSidebar);
+
+  // Close on link click (mobile)
+  sidebar.querySelectorAll('.sidebar-link').forEach(l => {
+    l.addEventListener('click', () => { if (window.innerWidth < 769) closeSidebar(); });
+  });
+
+  // ─── Copy buttons ────────────────────────────────────
+  document.querySelectorAll('.copy-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const code = btn.closest('.code-block').querySelector('code');
+      navigator.clipboard.writeText(code.innerText).then(() => {
+        btn.textContent = 'Copied!';
+        btn.classList.add('copied');
+        setTimeout(() => {
+          btn.textContent = 'Copy';
+          btn.classList.remove('copied');
+        }, 2000);
+      });
+    });
+  });
+
+  // ─── Language tabs ────────────────────────────────────
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const tabs  = btn.closest('.lang-tabs');
+      const panel = btn.dataset.tab;
+      tabs.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b === btn));
+      tabs.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('active', p.dataset.panel === panel));
+    });
+  });
+
+  // ─── Active section highlighting ─────────────────────
+  const allSectionIds = [
+    'introduction',
+    'getting-started', 'installation', 'running-server', 'cli-usage', 'quick-start',
+    'configuration', 'config-reference', 'roles-tokens',
+    'security', 'jwt-auth', 'stream-ownership', 'token-templates', 'security-hardening',
+    'durable-subscriptions',
+    'durable-queues',
+    'geospatial',
+    'protocol', 'wire-protocol', 'commands', 'responses', 'transactions', 'patch-operators',
+    'sdks', 'sdk-js', 'sdk-python', 'sdk-dart',
+    'architecture', 'modules', 'wal-snapshots', 'performance', 'design-decisions'
+  ];
+
+  const sidebarLinks = document.querySelectorAll('.sidebar-link[data-section]');
+  const tocLinks     = document.querySelectorAll('.toc-link');
+
+  function getActiveSectionId() {
+    const offset = 80;
+    let active = allSectionIds[0];
+    for (const id of allSectionIds) {
+      const el = document.getElementById(id);
+      if (!el) continue;
+      if (el.getBoundingClientRect().top <= offset) active = id;
+    }
+    return active;
+  }
+
+  function setActive(id) {
+    sidebarLinks.forEach(l => l.classList.toggle('active', l.dataset.section === id));
+    tocLinks.forEach(l => l.classList.toggle('active', l.getAttribute('href') === '#' + id));
+  }
+
+  let ticking = false;
+  window.addEventListener('scroll', () => {
+    if (!ticking) {
+      requestAnimationFrame(() => {
+        setActive(getActiveSectionId());
+        ticking = false;
+      });
+      ticking = true;
+    }
+  }, { passive: true });
+
+  setActive(getActiveSectionId());
+</script>
+
+</body>
+</html>
