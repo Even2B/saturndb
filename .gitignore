@@ -18,6 +18,7 @@ saturn.toml
 
 # Claude Code internal
 .claude/
+CLAUDE.md
 
 # OS
 .DS_Store
