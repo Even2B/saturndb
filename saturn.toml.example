@@ -1,0 +1,43 @@
+# SaturnDB configuration — copy to saturn.toml and edit
+
+[server]
+host    = "127.0.0.1"   # bind address (0.0.0.0 for production)
+port    = 7379           # TCP port
+ws_port = 7380           # WebSocket port (for browsers)
+tls     = false          # set true for production (auto-generates cert)
+
+[auth]
+admin_token = "change-me-in-production"
+
+# Static tokens — add as many as you need
+[auth.tokens]
+"myapp-token"  = { role = "writer", namespaces = ["users", "rides"] }
+"readonly"     = { role = "reader", namespaces = ["users"] }
+"expiring"     = { role = "reader", namespaces = ["public"], expires_at = "2027-01-01" }
+
+# JWT verification (Supabase / any HS256 issuer)
+# [auth.jwt]
+# secret     = "your-jwt-secret"   # Supabase: Settings → API → JWT Secret
+# role       = "writer"
+# namespaces = ["user:{sub}"]      # {sub} = user_id from JWT
+
+[storage]
+log_path          = "saturn.log"
+snapshot_interval = 1000     # snapshot every N events
+wal_mode          = "async"  # "async" (~55k ops/s) or "sync" (durable, slower)
+
+# Optional: cap in-memory history per stream (WAL untouched)
+# max_history_per_stream = 1000
+
+# Optional: rate limiting per connection
+# rate_limit_per_sec = 1000
+# rate_limit_burst   = 2000
+
+# Optional: drop idle connections
+# idle_timeout_secs = 300
+
+# Optional: cluster mode
+# [cluster]
+# node_id   = "node-1"
+# peers     = ["node-2:7379", "node-3:7379"]
+# gossip_port = 7381
