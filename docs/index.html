@@ -796,6 +796,7 @@
     <a href="#stream-ownership" class="sidebar-link" data-section="stream-ownership">Stream Ownership</a>
     <a href="#token-templates" class="sidebar-link" data-section="token-templates">Token Templates</a>
     <a href="#security-hardening" class="sidebar-link" data-section="security-hardening">Hardening</a>
+    <a href="#triggers" class="sidebar-link" data-section="triggers">Reactive Triggers</a>
     <a href="#geospatial" class="sidebar-link" data-section="geospatial">Geospatial</a>
     <a href="#durable-subscriptions" class="sidebar-link" data-section="durable-subscriptions">Durable Subscriptions</a>
     <a href="#durable-queues" class="sidebar-link" data-section="durable-queues">Durable Queues</a>
@@ -1213,6 +1214,69 @@ audit_log = "saturn-audit.log"</code></pre>
         </div>
       </section>
 
+      <!-- ─── Reactive Triggers ────────────────────────────── -->
+      <section id="triggers">
+        <h2>Reactive Triggers</h2>
+        <p>Triggers let you run server-side logic automatically when a stream is written — no app code, no polling. A rule fires on every matching write and either emits to another stream or enqueues a job.</p>
+
+        <h3>THEN EMIT</h3>
+        <p>Write to another stream whenever a pattern matches:</p>
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">text</span><button class="copy-btn">Copy</button></div>
+          <pre><code class="language-plaintext"># Mirror every order write to an audit log
+WHEN order:* THEN EMIT audit:log {"order":"$stream","ts":"$ts"}
+OK rule added: order:* → EMIT audit:log
+
+# Available template variables:
+# $stream     — full stream name (e.g. order:42)
+# $stream_id  — part after last colon (e.g. 42)
+# $ts         — unix microsecond timestamp
+# $id         — event id
+# $&lt;field&gt;   — any top-level payload field</code></pre>
+        </div>
+
+        <h3>THEN ENQUEUE</h3>
+        <p>Push a job onto a durable queue instead of emitting a stream. Workers pick it up with <code>DEQUEUE WAIT</code>:</p>
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">text</span><button class="copy-btn">Copy</button></div>
+          <pre><code class="language-plaintext"># Queue a dispatch job whenever a ride stream is written
+WHEN ride:* THEN ENQUEUE jobs:dispatch {"ride_id":"$stream_id"}
+OK rule added: ride:* → ENQUEUE jobs:dispatch
+
+# Worker picks it up:
+DEQUEUE jobs:dispatch WAIT
+JOB 1001 {"ride_id":"42"}</code></pre>
+        </div>
+
+        <h3>WHERE Conditions</h3>
+        <p>Add an optional <code>WHERE</code> clause to only fire when the payload matches. Supports <code>=</code>, <code>!=</code>, <code>&gt;</code>, <code>&gt;=</code>, <code>&lt;</code>, <code>&lt;=</code>, <code>CONTAINS</code>.</p>
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">text</span><button class="copy-btn">Copy</button></div>
+          <pre><code class="language-plaintext"># Only enqueue when a ride is requested (not on every update)
+WHEN ride:* WHERE status = requested THEN ENQUEUE jobs:dispatch {"ride":"$stream_id"}
+
+# Alert when a sensor exceeds a threshold
+WHEN sensor:* WHERE temp > 80 THEN EMIT alerts:high {"src":"$stream","val":"$temp"}
+
+# Invoice only completed orders
+WHEN order:* WHERE status = completed THEN ENQUEUE jobs:invoice {"order":"$stream_id"}</code></pre>
+        </div>
+
+        <h3>Managing Rules</h3>
+        <div class="code-block">
+          <div class="code-header"><span class="code-lang">text</span><button class="copy-btn">Copy</button></div>
+          <pre><code class="language-plaintext">WHEN LIST
+RULE ride:* WHERE status = requested → ENQUEUE jobs:dispatch {"ride":"$stream_id"}
+RULE order:* → EMIT audit:log {"order":"$stream"}
+
+WHEN DEL ride:* jobs:dispatch
+OK rule removed: ride:* → jobs:dispatch</code></pre>
+        </div>
+        <div class="callout tip">
+          <p>Rules are admin-only and persisted to <code>saturn-rules.json</code> — they survive restarts. Derived events from <code>THEN EMIT</code> do not cascade (rules don't fire on rule-generated events).</p>
+        </div>
+      </section>
+
       <!-- ─── Durable Subscriptions ───────────────────────── -->
       <section id="durable-subscriptions">
         <h2>Durable Subscriptions</h2>
@@ -1435,6 +1499,10 @@ OK</code></pre>
                 <tr><td><code>TOKEN REVOKE</code></td><td><code>TOKEN REVOKE &lt;token&gt;</code></td><td>Revoke a token immediately.</td></tr>
                 <tr><td><code>TOKEN LIST</code></td><td><code>TOKEN LIST</code></td><td>List all active tokens.</td></tr>
                 <tr><td><code>CLAIM</code></td><td><code>CLAIM &lt;stream&gt;</code></td><td>Claim write ownership of a stream. Requires JWT session. Only the owner or admin can write after claiming.</td></tr>
+                <tr><td><code>WHEN ... THEN EMIT</code></td><td><code>WHEN &lt;pattern&gt; [WHERE &lt;field&gt; &lt;op&gt; &lt;val&gt;] THEN EMIT &lt;target&gt; &lt;template&gt;</code></td><td>Fire a reactive rule — emit to another stream on match. Admin only.</td></tr>
+                <tr><td><code>WHEN ... THEN ENQUEUE</code></td><td><code>WHEN &lt;pattern&gt; [WHERE &lt;field&gt; &lt;op&gt; &lt;val&gt;] THEN ENQUEUE &lt;queue&gt; &lt;template&gt;</code></td><td>Fire a reactive rule — enqueue a job on match. Admin only.</td></tr>
+                <tr><td><code>WHEN LIST</code></td><td><code>WHEN LIST</code></td><td>List all active trigger rules.</td></tr>
+                <tr><td><code>WHEN DEL</code></td><td><code>WHEN DEL &lt;pattern&gt; &lt;target|queue&gt;</code></td><td>Remove a trigger rule.</td></tr>
                 <tr><td><code>WHEN TOKEN</code></td><td><code>WHEN TOKEN &lt;pattern&gt; &lt;token_tmpl&gt; &lt;role&gt; [ns1,ns2]</code></td><td>Auto-create a token whenever a matching stream is written. Admin only.</td></tr>
                 <tr><td><code>WHEN TOKEN DEL</code></td><td><code>WHEN TOKEN DEL &lt;pattern&gt; &lt;token_tmpl&gt;</code></td><td>Remove a token template rule.</td></tr>
                 <tr><td><code>WHEN TOKEN LIST</code></td><td><code>WHEN TOKEN LIST</code></td><td>List all token template rules.</td></tr>
@@ -1864,6 +1932,7 @@ void main() async {
       <a href="#stream-ownership" class="toc-link sub">Stream Ownership</a>
       <a href="#token-templates" class="toc-link sub">Token Templates</a>
       <a href="#security-hardening" class="toc-link sub">Hardening</a>
+      <a href="#triggers" class="toc-link">Reactive Triggers</a>
       <a href="#durable-subscriptions" class="toc-link">Durable Subscriptions</a>
       <a href="#durable-queues" class="toc-link">Durable Queues</a>
       <a href="#geospatial" class="toc-link">Geospatial</a>
@@ -1951,6 +2020,7 @@ void main() async {
     'getting-started', 'installation', 'running-server', 'cli-usage', 'quick-start',
     'configuration', 'config-reference', 'roles-tokens',
     'security', 'jwt-auth', 'stream-ownership', 'token-templates', 'security-hardening',
+    'triggers',
     'durable-subscriptions',
     'durable-queues',
     'geospatial',
