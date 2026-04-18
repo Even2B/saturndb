@@ -4,8 +4,8 @@ use tokio::net::{TcpListener, TcpStream};
 use tokio_tungstenite::{accept_async, tungstenite::Message};
 
 pub async fn listen(ws_port: u16, saturn_port: u16, host: &str) -> anyhow::Result<()> {
-    let ws_addr   = format!("{host}:{ws_port}");
-    let saturn_addr = format!("{host}:{saturn_port}");
+    let ws_addr     = format!("{host}:{ws_port}");
+    let saturn_addr = format!("127.0.0.1:{saturn_port}");
     let listener  = TcpListener::bind(&ws_addr).await?;
     println!("saturn-ws listening on {ws_addr}");
 

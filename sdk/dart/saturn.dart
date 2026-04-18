@@ -15,14 +15,13 @@ class SaturnDBClient {
   final int    _port;
   final String _token;
 
-  Socket?  _socket;
-  String   _buffer          = '';
-  bool     _closing         = false;
-  Duration _reconnectDelay  = const Duration(milliseconds: 500);
+  Socket?              _socket;
+  String               _buffer         = '';
+  bool                 _closing        = false;
+  Duration             _reconnectDelay = const Duration(milliseconds: 500);
 
-  final Map<String, EventHandler> _handlers    = {};
-  final StreamController<String>  _lineStream  = StreamController.broadcast();
-  StreamSubscription?             _subscription;
+  final Map<String, EventHandler> _handlers = {};
+  Completer<String>?               _pending;
 
   SaturnDBClient({String host = '127.0.0.1', int port = 7379, String token = ''})
       : _host  = host,
@@ -32,9 +31,10 @@ class SaturnDBClient {
   Future<void> connect() async {
     _socket = await Socket.connect(_host, _port);
     _socket!.setOption(SocketOption.tcpNoDelay, true);
+    _buffer         = '';
     _reconnectDelay = const Duration(milliseconds: 500);
 
-    _subscription = _socket!
+    _socket!
         .cast<List<int>>()
         .transform(utf8.decoder)
         .listen(_onData, onDone: _onClose, onError: (_) => _onClose());
@@ -80,20 +80,23 @@ class SaturnDBClient {
 
   Future<void> disconnect() async {
     _closing = true;
-    await _subscription?.cancel();
+    _rejectPending(StateError('disconnected'));
     await _socket?.close();
   }
 
-  Future<String> _send(String line) async {
+  Future<String> _send(String line) {
+    final completer = Completer<String>();
+    _pending = completer;
     _socket!.write('$line\n');
-    await for (final response in _lineStream.stream) {
-      if (response.startsWith('EVENT ')) {
-        _dispatch(response);
-        continue;
-      }
-      return response;
+    return completer.future;
+  }
+
+  void _rejectPending(Object error) {
+    final p = _pending;
+    if (p != null && !p.isCompleted) {
+      _pending = null;
+      p.completeError(error);
     }
-    throw StateError('connection closed');
   }
 
   void _onData(String chunk) {
@@ -104,7 +107,16 @@ class SaturnDBClient {
     for (final line in lines) {
       final trimmed = line.trim();
       if (trimmed.isEmpty) continue;
-      _lineStream.add(trimmed);
+
+      if (trimmed.startsWith('EVENT ')) {
+        _dispatch(trimmed);
+      } else {
+        final p = _pending;
+        if (p != null && !p.isCompleted) {
+          _pending = null;
+          p.complete(trimmed);
+        }
+      }
     }
   }
 
@@ -123,6 +135,7 @@ class SaturnDBClient {
 
   void _onClose() {
     if (_closing) return;
+    _rejectPending(StateError('connection closed'));
     _scheduleReconnect();
   }
 
